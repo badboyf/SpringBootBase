@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Properties>
+		<Property name="LOG_DIR">logs/fzk</Property>
+		<Property name="ARCHIVE">${LOG_DIR}/archive</Property>
+		<Property name="PATTERN">%d %-5level ${PID} [%t] %c:%M(%L): %m%n
+		</Property>
+	</Properties>
+
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="${PATTERN}" />
+		</Console>
+
+		<RollingFile name="fileWriter" fileName="${LOG_DIR}/application.log"
+			filePattern="${ARCHIVE}/application.log.%d{yyyy-MM-dd}.gz">
+			<PatternLayout pattern="${PATTERN}" />
+			<TimeBasedTriggeringPolicy />
+		</RollingFile>
+
+		<RollingFile name="accessLog" fileName="${LOG_DIR}/accessLog/access.log"
+			filePattern="${LOG_DIR}/accessLog/archive/access.log.%d{yyyy-MM-dd}.gz">
+			<PatternLayout pattern="%d %-5level ${PID} [%t] %m%n" />
+			<TimeBasedTriggeringPolicy />
+		</RollingFile>
+
+		<RollingFile name="serviceLog" fileName="${LOG_DIR}/serviceLog/service.log"
+			filePattern="${LOG_DIR}/serviceLog/archive/service.log.%d{yyyy-MM-dd}.gz">
+			<PatternLayout pattern="%d %-5level ${PID} [%t] %m%n" />
+			<TimeBasedTriggeringPolicy />
+		</RollingFile>
+	</Appenders>
+
+	<Loggers>
+		<Root level="debug">
+			<AppenderRef ref="fileWriter" />
+		</Root>
+
+		<Logger name="cn.com.fzk.filter.AccessLogFilter" level="trace"
+			additivity="false">
+			<appender-ref ref="accessLog" />
+		</Logger>
+
+		<Logger name="cn.com.fzk.interceptor" level="trace"
+			additivity="false">
+			<appender-ref ref="serviceLog" />
+		</Logger>
+	</Loggers>
+</Configuration>

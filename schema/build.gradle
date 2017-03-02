@@ -1,0 +1,89 @@
+// These imports are needed further down
+// -------------------------------------
+import javax.xml.bind.JAXB
+import org.jooq.util.GenerationTool
+
+buildscript {
+    repositories {
+		mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.2.7.RELEASE")
+        classpath 'org.jooq:jooq-codegen:3.7.0'
+        classpath 'org.jooq:jooq-meta:3.7.0'
+        classpath('mysql:mysql-connector-java:5.1.37')
+       	classpath 'org.springframework:springloaded:1.2.0.RELEASE'
+    }
+}
+
+task jooq_code_gen {
+    // Use your favourite XML builder to construct the code generation configuration file
+    // ----------------------------------------------------------------------------------
+    def writer = new StringWriter()
+    def xml = new groovy.xml.MarkupBuilder(writer)
+            .configuration('xmlns': 'http://www.jooq.org/xsd/jooq-codegen-3.7.0.xsd') {
+        jdbc() {
+            driver('com.mysql.jdbc.Driver')
+            url('jdbc:mysql://192.168.1.109:3306')
+            user('root')
+            password('root')
+        }
+        generator() {
+            database() {
+            	inputSchema('fzk')
+            }
+            generate() {
+                daos('true')	
+                interfaces('true')
+            }
+            target() {
+            	packageName('cn.com.fzk.schema.generated')
+                directory('src/main/java')
+            }
+        }
+    }
+
+
+    // Run the code generator
+    // ----------------------
+    org.jooq.util.GenerationTool.main(
+        javax.xml.bind.JAXB.unmarshal(
+            new StringReader(writer.toString()),
+            org.jooq.util.jaxb.Configuration.class
+        )
+    )
+    
+}
+
+apply plugin: 'java'
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/main/java/cn/com/fzk/schema']
+        }
+    }
+}
+
+jar {
+    baseName = 'schema'
+}
+
+repositories {
+	mavenLocal()
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile 'org.jooq:jooq:3.7.0'
+    compile 'org.jooq:jooq-codegen:3.7.0'
+    compile('org.jooq:jooq-meta:3.7.0')
+    compile("mysql:mysql-connector-java:5.1.37")
+}
+
+
+
